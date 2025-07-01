@@ -7,6 +7,42 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CrowdFundingContract is Ownable{
 
+    // --- Events ---
+    event ProgramCreated(
+        uint256 indexed id,
+        string title,
+        address indexed pic,
+        uint256 targetFund,
+        uint256 startDate,
+        uint256 endDate
+    );
+
+    event ContributionReceived(
+        uint256 indexed programId,
+        address indexed contributor,
+        uint256 amountContributed, // Actual amount that went into the program
+        uint256 totalCollected
+    );
+
+    event FundsWithdrawn(
+        uint256 indexed programId,
+        address indexed recipient,
+        uint256 amount,
+        string desc,
+        uint256 timestamp
+    );
+
+    event ProgramCanceled(
+        uint256 indexed programId,
+        address indexed canceller
+    );
+
+    event RefundIssued(
+        uint256 indexed programId,
+        address indexed contributor,
+        uint256 amount
+    );
+    // --- End Events ---
 
     constructor() Ownable(msg.sender) {}
 
@@ -96,13 +132,20 @@ contract CrowdFundingContract is Ownable{
             });
 
             listProgramId.push(programId);
+            emit ProgramCreated(
+            programId,
+            _title,
+            _pic,
+            _targetFund,
+            _startDate,
+            _endDate
+        );
 
     }
 
     function contribute
         (
             uint _programId
-            
         )
         public
         payable
@@ -128,6 +171,8 @@ contract CrowdFundingContract is Ownable{
                 msg.value
             );
             contributeHistory[_programId].push(_contribute);
+
+            emit ContributionReceived(_programId, msg.sender, msg.value, _program.totalAmount);
     }
 
     function withdraw
@@ -165,6 +210,13 @@ contract CrowdFundingContract is Ownable{
             );
 
             withdrawalByProgram[_programId].push(withdrawal);
+            emit FundsWithdrawn(
+            _programId,
+            _program.pic,
+            _amount,
+            _desc,
+            block.timestamp
+        );
 
     }
 
@@ -185,6 +237,7 @@ contract CrowdFundingContract is Ownable{
                 uint256 _amount = contributeHistory[_programId][i].amount;
                 (bool success, ) = payable(_addr).call{value: _amount}("");
                 if(!success) revert CancelAndRefundFailed();
+                emit RefundIssued(_programId, _addr, _amount);
             }
             _program.status = ProgramStatus.Canceled;
     }
