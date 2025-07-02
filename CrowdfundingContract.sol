@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from './lib/openzeppelin-contracts/contracts/access/Ownable.sol';
 
 
 contract CrowdFundingContract is Ownable{
@@ -62,9 +62,6 @@ contract CrowdFundingContract is Ownable{
         uint256 totalAmount;
         uint256 withdrawAmount;
         ProgramStatus status;
-        // Contribute[] contributions;
-        // address[] contributors;
-        // uint[] contributionAmounts;
     }
 
     struct ContributeHistory {
