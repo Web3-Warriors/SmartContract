@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 
 import {Ownable} from './lib/openzeppelin-contracts/contracts/access/Ownable.sol';
+import {ICrowdFundingContract} from './ICrowdFunding.sol';
 
 
 contract CrowdFundingContract is Ownable{
@@ -182,7 +183,7 @@ contract CrowdFundingContract is Ownable{
         onlyPIC(_programId, msg.sender)
         {
             Program storage _program = programs[_programId];
-            if (_program.targetFund > block.timestamp) {
+            if (_program.endDate > block.timestamp) {
                 revert FundraiseIsNotClosed();
             
             }
