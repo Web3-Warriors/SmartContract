@@ -192,7 +192,7 @@ contract CrowdFundingContract is Ownable{
             uint256 totalWithdraw = _program.withdrawAmount;
 
             // withdraw tidak boleh lebih dari data total dana yang sudah terkumpul
-            if (_amount + totalWithdraw >= totaAmountFund) {
+            if (_amount + totalWithdraw > totaAmountFund) {
                 revert WithdrawAmountError();
             }
 
