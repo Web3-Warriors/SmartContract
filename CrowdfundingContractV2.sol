@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 
 import {Ownable} from './lib/openzeppelin-contracts/contracts/access/Ownable.sol';
-import {ICrowdFundingContract} from './ICrowdFunding.sol';
+
 
 
 contract CrowdFundingContract is Ownable{
@@ -291,7 +291,7 @@ contract CrowdFundingContract is Ownable{
     }
 
     function withdrawFeeAdmin(uint256 _amount) external onlyOwner {
-        if(_amount >= totalPlatformFee){
+        if(_amount > totalPlatformFee){
             revert FaildAmountAdminWD();
         }
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
