@@ -200,10 +200,10 @@ contract CrowdFundingContract is Ownable{
         onlyPIC(_programId, msg.sender)
         {
             Program storage _program = programs[_programId];
-            // if (_program.endDate > block.timestamp) {
-            //     revert FundraiseIsNotClosed();
+            if (_program.endDate > block.timestamp) {
+                revert FundraiseIsNotClosed();
             
-            // }
+            }
 
             // uint256 totalAmountFund = _program.totalAmount;
 
