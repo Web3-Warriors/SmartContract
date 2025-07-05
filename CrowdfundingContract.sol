@@ -156,13 +156,27 @@ contract CrowdFundingContract is Ownable{
             }
             // validasi untuk dana program sudah tercapai
             require(_program.totalAmount != _program.targetFund, "Fund has reached");
+
+            uint256 remainingFundsNeeded = _program.targetFund - _program.totalAmount;
             
             // mengubah status menjadi completed jika fund terakhir sudah mencukupi target fund
+            if(msg.value > remainingFundsNeeded){
+                uint excessAmount = msg.value - remainingFundsNeeded;
+                uint refundedAmount = msg.value - excessAmount;
+                (bool success, ) = payable(msg.sender).call{value: excessAmount}("");
+                if(!success) revert CancelAndRefundFailed();
+                _program.totalAmount += refundedAmount;
+                _program.status = ProgramStatus.Completed;
+            }
+            else{
+                _program.totalAmount += msg.value;
+            }
+
+
             if((msg.value + _program.totalAmount) == _program.targetFund){
                 _program.status = ProgramStatus.Completed;
             }
-           
-            _program.totalAmount += msg.value;
+
 
             ContributeHistory memory _contribute = ContributeHistory(
                 msg.sender,
@@ -239,6 +253,7 @@ contract CrowdFundingContract is Ownable{
             }
             _program.status = ProgramStatus.Canceled;
     }
+
 
 
     function getHistoryWithdrawByProgram
