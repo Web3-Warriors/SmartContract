@@ -303,9 +303,18 @@ contract CrowdFundingContract is Ownable{
         }
     }
 
-    function getFeeProgram(uint256 _programId) external  onlyOwner view returns(uint256){
+    function getFeeProgram(uint256 _programId) external  onlyPIC(_programId, msg.sender) view returns(uint256){
         return feeProgram[_programId];
     }
+
+    function getAmountProgramAfterFee(uint256 _programId) external onlyPIC(_programId, msg.sender)  onlyOwner view returns(uint256){
+        return amountProgramAfterFee[_programId];
+    }
+
+    function getTotalPlatformFee() external onlyOwner view  returns(uint256){
+        return totalPlatformFee;
+    }
+
 
     
 }
