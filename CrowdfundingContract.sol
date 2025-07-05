@@ -86,6 +86,9 @@ contract CrowdFundingContract is Ownable{
 
     uint256[] public listProgramId;
 
+    uint256 public totalPlatformFee;
+    mapping(uint256 => uint256) public totalFeeByProgram;
+
 
     modifier onlyPIC(uint256 _programId ,address _PIC){
         if(programs[_programId].pic != _PIC ){
@@ -100,6 +103,8 @@ contract CrowdFundingContract is Ownable{
     error WithdrawAmountError();
     error WithdrawFailed();
     error CancelAndRefundFailed();
+    error AdminWithdrawFailed();
+    error FaildAmountAdminWD();
 
     function createProgram
         (
@@ -202,11 +207,19 @@ contract CrowdFundingContract is Ownable{
             
             }
 
-            uint256 totaAmountFund = _program.totalAmount;
+            uint256 totalAmountFund = _program.totalAmount;
+
+            uint256 fee = totalAmountFund * 5 / 100;
+            uint256 amountAfterFee = totalAmountFund * 95 / 100;
+
+            if(totalFeeByProgram[_programId] <= 0){
+                totalFeeByProgram[_programId] = fee;
+                totalPlatformFee += fee;
+            }
             uint256 totalWithdraw = _program.withdrawAmount;
 
             // withdraw tidak boleh lebih dari data total dana yang sudah terkumpul
-            if (_amount + totalWithdraw > totaAmountFund) {
+            if (_amount + totalWithdraw > amountAfterFee) {
                 revert WithdrawAmountError();
             }
 
@@ -273,6 +286,19 @@ contract CrowdFundingContract is Ownable{
 
     function getProgramById(uint256 _programId) public view returns (Program memory){
         return programs[_programId];
+    }
+
+    function withdrawFeeAdmin(uint256 _amount) external onlyOwner {
+        if(_amount >= totalPlatformFee){
+            revert FaildAmountAdminWD();
+        }
+        (bool success, ) = payable(msg.sender).call{value: _amount}("");
+
+        if(success){
+            totalPlatformFee -= _amount;
+        }else {
+            revert AdminWithdrawFailed();
+        }
     }
     
 }
